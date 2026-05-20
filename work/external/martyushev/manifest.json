@@ -1,0 +1,26 @@
+{
+  "paper": "Self-Calibration of Cameras with Euclidean Image Plane in Case of Two Views and Known Relative Rotation Angle",
+  "author": "Evgeniy Martyushev",
+  "public_code_found": false,
+  "notes": [
+    "GitHub repository search returned no public repository for the paper title.",
+    "This paper-local package therefore starts from the published PDF and arXiv source."
+  ],
+  "downloads": {
+    "pdf": {
+      "url": "https://openaccess.thecvf.com/content_ECCV_2018/papers/Martyushev_Self-Calibration_of_Cameras_ECCV_2018_paper.pdf",
+      "path": "C:\\Users\\AAdministrator\\Desktop\\KFPPS_repo\\papers\\KFPPS\\work\\external\\martyushev\\martyushev_eccv2018.pdf",
+      "status": "downloaded"
+    },
+    "arxiv_source": {
+      "url": "https://arxiv.org/e-print/1807.11279v1",
+      "path": "C:\\Users\\AAdministrator\\Desktop\\KFPPS_repo\\papers\\KFPPS\\work\\external\\martyushev\\martyushev_arxiv_source.tar.gz",
+      "status": "downloaded"
+    },
+    "arxiv_source_extract": {
+      "archive": "C:\\Users\\AAdministrator\\Desktop\\KFPPS_repo\\papers\\KFPPS\\work\\external\\martyushev\\martyushev_arxiv_source.tar.gz",
+      "status": "extracted",
+      "destination": "C:\\Users\\AAdministrator\\Desktop\\KFPPS_repo\\papers\\KFPPS\\work\\external\\martyushev\\arxiv_source"
+    }
+  }
+}

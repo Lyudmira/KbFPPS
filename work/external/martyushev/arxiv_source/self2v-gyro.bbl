@@ -1,0 +1,130 @@
+\providecommand{\bysame}{\leavevmode\hbox to3em{\hrulefill}\thinspace}
+\providecommand{\MR}{\relax\ifhmode\unskip\space\fi MR }
+% \MRhref is called by the amsart/book/proc definition of \MR.
+\providecommand{\MRhref}[2]{%
+  \href{http://www.ams.org/mathscinet-getitem?mr=#1}{#2}
+}
+\providecommand{\href}[2]{#2}
+\begin{thebibliography}{10}
+
+\bibitem{EuRoC}
+M.~Burri, J.~Nikolic, P.~Gohl, T.~Schneider, J.~Rehder, S.~Omari, M.W.
+  Achtelik, and R.~Siegwart, \emph{The {E}u{R}o{C} micro aerial vehicle
+  datasets}, The International Journal of Robotics Research \textbf{35} (2016),
+  no.~10, 1157--1163.
+
+\bibitem{BJA}
+M.~Byr{\"o}d, K.~Josephson, and K.~{\AA}str{\"o}m, \emph{Improving numerical
+  accuracy of {G}r{\"o}bner basis polynomial equation solver}, Computer Vision,
+  2007. ICCV 2007. IEEE 11th International Conference on, IEEE, 2007, pp.~1--8.
+
+\bibitem{CP90}
+Bruno Caprile and Vincent Torre, \emph{Using vanishing points for camera
+  calibration}, International journal of computer vision \textbf{4} (1990),
+  no.~2, 127--139.
+
+\bibitem{CLS}
+D.~Cox, J.~Little, and D.~O'Shea, \emph{Ideals, varieties, and algorithms},
+  vol.~3, Springer, 2007.
+
+\bibitem{Faugeras93}
+O.D. Faugeras, \emph{Three-dimensional computer vision: A geometric viewpoint},
+  MIT Press, 1993.
+
+\bibitem{Hartley92}
+R.~Hartley, \emph{Estimation of relative camera positions for uncalibrated
+  cameras}, European Conference on Computer Vision, Springer, 1992,
+  pp.~579--587.
+
+\bibitem{Hartley}
+\bysame, \emph{Self-calibration from multiple views with a rotating camera},
+  European Conference on Computer Vision, Springer, 1994, pp.~471--478.
+
+\bibitem{HZ}
+R.~Hartley and A.~Zisserman, \emph{Multiple view geometry in computer vision},
+  Cambridge University Press, 2003.
+
+\bibitem{Heikkila}
+J.~Heikkil{\"a}, \emph{Geometric camera calibration using circular control
+  points}, IEEE Transactions on Pattern Analysis and Machine Intelligence
+  \textbf{22} (2000), no.~10, 1066--1077.
+
+\bibitem{HA}
+A.~Heyden and K.~{\AA}str{\"o}m, \emph{Euclidean reconstruction from image
+  sequences with varying and unknown focal length and principal point},
+  Conference on Computer Vision and Pattern Recognition, IEEE, 1997,
+  pp.~438--443.
+
+\bibitem{KBP}
+Z.~Kukelova, M.~Bujnak, and T.~Pajdla, \emph{Polynomial eigenvalue solutions to
+  the 5-pt and 6-pt relative pose problems}, British Machine Vision Conference,
+  vol.~2, 2008.
+
+\bibitem{LHLP}
+B.~Li, L.~Heng, G.H. Lee, and M.~Pollefeys, \emph{A 4-point algorithm for
+  relative pose estimation of a calibrated camera with a known relative
+  rotation angle}, IEEE/RSJ International Conference on Intelligent Robots and
+  Systems, IEEE, 2013, pp.~1595--1601.
+
+\bibitem{Li}
+H.~Li, \emph{A simple solution to the six-point two-view focal-length problem},
+  European Conference on Computer Vision, Springer, 2006, pp.~200--213.
+
+\bibitem{LZ99}
+David Liebowitz and Andrew Zisserman, \emph{Combining scene and
+  auto-calibration constraints}, Computer Vision, 1999. The Proceedings of the
+  Seventh IEEE International Conference on, vol.~1, IEEE, 1999, pp.~293--300.
+
+\bibitem{Maybank}
+S.J. Maybank, \emph{Theory of reconstruction from image motion},
+  Springer-Verlag, 1993.
+
+\bibitem{MF}
+S.J. Maybank and O.D. Faugeras, \emph{A theory of self calibration of a moving
+  camera}, International Journal of Computer Vision \textbf{8} (1992), no.~2,
+  123--151.
+
+\bibitem{Nister}
+D.~Nist{\'e}r, \emph{An efficient solution to the five-point relative pose
+  problem}, IEEE Transactions on Pattern Analysis and Machine Intelligence
+  \textbf{26} (2004), no.~6, 756--770.
+
+\bibitem{QT}
+L.~Quan and B.~Triggs, \emph{A unification of autocalibration methods}, Asian
+  Conference on Computer Vision, 2000, pp.~917--922.
+
+\bibitem{SEN06}
+H.~Stew{\'e}nius, C.~Engels, and D.~Nist{\'e}r, \emph{Recent developments on
+  direct relative orientation}, ISPRS Journal of Photogrammetry and Remote
+  Sensing \textbf{60} (2006), no.~4, 284--294.
+
+\bibitem{SNKS}
+H.~Stew{\'e}nius, D.~Nist{\'e}r, F.~Kahl, and F.~Schaffalitzky, \emph{A minimal
+  solution for relative pose with unknown focal length}, Image and Vision
+  Computing \textbf{26} (2008), no.~7, 871--877.
+
+\bibitem{Sturm2}
+P.~Sturm, \emph{Critical motion sequences for monocular self-calibration and
+  uncalibrated {E}uclidean reconstruction}, Conference on Computer Vision and
+  Pattern Recognition, IEEE, 1997, pp.~1100--1105.
+
+\bibitem{Sturm}
+\bysame, \emph{Self-calibration of a moving zoom-lens camera by
+  pre-calibration}, Image and Vision Computing \textbf{15} (1997), no.~8,
+  583--589.
+
+\bibitem{Triggs}
+B.~Triggs, \emph{Autocalibration and the absolute quadric}, Conference on
+  Computer Vision and Pattern Recognition, IEEE, 1997, pp.~609--614.
+
+\bibitem{Tsai}
+R.Y. Tsai, \emph{A versatile camera calibration technique for high-accuracy 3d
+  machine vision metrology using off-the-shelf {TV} cameras and lenses}, IEEE
+  Journal on Robotics and Automation \textbf{3} (1987), no.~4, 323--344.
+
+\bibitem{Zhang}
+Z.~Zhang, \emph{A flexible new technique for camera calibration}, IEEE
+  Transactions on pattern analysis and machine intelligence \textbf{22} (2000),
+  no.~11, 1330--1334.
+
+\end{thebibliography}
