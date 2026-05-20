@@ -17,10 +17,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent
 WORK = ROOT / "work"
-REPO_ROOT = ROOT.parents[1]
-KFPPS_ROOT = REPO_ROOT / "KFPPS"
-
-sys.path.insert(0, str(KFPPS_ROOT / "vendor"))
+sys.path.insert(0, str(ROOT / "vendor"))
 
 from kfpps.types import SearchBox
 from unified_optimize import FocalPrior, FundamentalObservation, KFPPSFocalProfileConfig, KFPPSFocalProfileOptimizer

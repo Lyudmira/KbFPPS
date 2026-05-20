@@ -158,7 +158,7 @@ psi(eta) = min_{c in Omega} Phi_{exp(eta)}(c).
 
 ### 6.1 为什么实验放在 `papers/KFPPS`
 
-本文刻意遵循与 `papers/PCCC` 相同的组织方式：实验脚本、下载到的参考材料、输出结果、表格与 paper draft 全部放在 `papers/KFPPS` 下；`../../KFPPS/vendor` 只保留实际求解器内核。这样做的原因很直接：论文实验应当 paper-local、可一键复现，而不是把叙事和代码散落在运行库里。
+本文刻意遵循与 `papers/PCCC` 相同的组织方式：实验脚本、下载到的参考材料、输出结果、表格与 paper draft 全部放在 `papers/KFPPS` 下；`vendor/` 只保留实际求解器内核。这样做的原因很直接：论文实验应当 paper-local、可一键复现，而不是把叙事和代码散落在运行库里。
 
 ### 6.2 Martyushev 参考材料
 

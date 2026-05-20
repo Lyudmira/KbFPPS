@@ -4,8 +4,8 @@ This directory is the paper-local reproduction package for the KFPPS vs.
 Martyushev 2018 study.
 
 It keeps all paper assets, downloaded references, experiment outputs, and
-paper-ready tables under `work/`, while reusing the KFPPS algorithm kernel from
-`../../KFPPS/vendor`.
+paper-ready tables under `work/`, while bundling the KFPPS algorithm kernel
+under `vendor/`.
 
 One command on Windows:
 
@@ -59,7 +59,7 @@ Outputs:
 Current scope:
 
 - This package is now responsible for the paper-local experiment harness.
-- The KFPPS angle-aware kernel lives in `../../KFPPS/vendor`, because that is
+- The KFPPS angle-aware kernel lives in `vendor/`, which is the local copy of
   the actual solver implementation used by the paper.
 - Direct reproduction of Martyushev's minimal Groebner/action-matrix solver is
   not wired in yet; since no official public code was found, that block will be
