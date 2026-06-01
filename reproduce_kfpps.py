@@ -24,6 +24,8 @@ from unified_optimize import FocalPrior, FundamentalObservation, KFPPSFocalProfi
 from unified_optimize.data import OptimizerBounds
 from unified_optimize.geometry import estimate_fundamental_normalized_eight_point, fundamental_from_rt
 
+from martyushev_solver import solve_calibration_from_correspondences, select_feasible_solution
+
 
 MARTYUSHEV_PDF_URL = (
     "https://openaccess.thecvf.com/content_ECCV_2018/papers/"
@@ -181,6 +183,7 @@ class BenchmarkCondition:
     name: str
     pair_count: int
     use_angle: bool
+    method: str = "profile"  # "profile" | "martyushev_single" | "martyushev_avg"
 
 
 @dataclass(frozen=True)
@@ -311,7 +314,9 @@ def estimate_pairwise_fundamental(
     image_noise_px: float,
     scene_distance: float,
     scene_depth: float,
-) -> np.ndarray:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return (F, noisy_points0, noisy_points1) for one synthetic image pair."""
+
     points0, points1 = sample_visible_correspondences(
         rng,
         num_points=num_points,
@@ -329,7 +334,101 @@ def estimate_pairwise_fundamental(
         noise1 = image_noise_px * rng.standard_normal(points1.shape)
         points0 = points0 + noise0
         points1 = points1 + noise1
-    return estimate_fundamental_normalized_eight_point(points0, points1)
+    F = estimate_fundamental_normalized_eight_point(points0, points1)
+    return F, points0, points1
+
+
+@dataclass
+class _PairData:
+    F: np.ndarray
+    points0: np.ndarray
+    points1: np.ndarray
+    angle_deg: float
+    observed_angle_deg: float
+    rotation_trace: float
+
+
+def _generate_pairs(
+    rng: np.random.Generator,
+    *,
+    condition: BenchmarkCondition,
+    image_size: tuple[int, int],
+    focal_true: float,
+    cx_true: float,
+    cy_true: float,
+    image_noise_px: float,
+    angle_noise_sigma: float,
+    num_points: int,
+    baseline_length: float,
+    scene_distance: float,
+    scene_depth: float,
+) -> list[_PairData]:
+    pairs: list[_PairData] = []
+    for _ in range(condition.pair_count):
+        rotation, translation_direction, angle_deg = sample_motion(rng)
+        translation = baseline_length * translation_direction
+        F, points0, points1 = estimate_pairwise_fundamental(
+            rng,
+            num_points=num_points,
+            image_size=image_size,
+            focal=focal_true,
+            cx=cx_true,
+            cy=cy_true,
+            rotation=rotation,
+            translation=translation,
+            image_noise_px=image_noise_px,
+            scene_distance=scene_distance,
+            scene_depth=scene_depth,
+        )
+        observed_angle_deg = float(angle_deg * (1.0 + angle_noise_sigma * rng.normal()))
+        rotation_trace = 1.0 + 2.0 * math.cos(math.radians(observed_angle_deg))
+        pairs.append(
+            _PairData(
+                F=F,
+                points0=points0,
+                points1=points1,
+                angle_deg=angle_deg,
+                observed_angle_deg=observed_angle_deg,
+                rotation_trace=rotation_trace,
+            )
+        )
+    return pairs
+
+
+def _estimate_martyushev(
+    pairs: list[_PairData],
+    *,
+    image_size: tuple[int, int],
+    average: bool,
+) -> tuple[float, float, float, bool, str]:
+    """Per-pair minimal solve; single-pair takes pair 0, multi-pair averages.
+
+    This is the paper's information-usage model: solve each pair independently,
+    then combine multiple pairs by averaging the feasible solutions. It is the
+    point of comparison against the profile optimizer, which instead accumulates
+    all pairs in one joint objective.
+    """
+
+    per_pair: list[tuple[float, float, float]] = []
+    for pair in pairs:
+        solutions = solve_calibration_from_correspondences(pair.points0, pair.points1, pair.rotation_trace)
+        best = select_feasible_solution(solutions, image_size=image_size, center_radius_px=0.5 * image_size[0])
+        if best is None and solutions:
+            best = min(solutions, key=lambda s: s.residual)
+        if best is not None and math.isfinite(best.focal):
+            per_pair.append((best.focal, best.cx, best.cy))
+        if not average and per_pair:
+            break
+    if not per_pair:
+        return float("nan"), float("nan"), float("nan"), False, "no feasible solution"
+    arr = np.asarray(per_pair, dtype=np.float64)
+    if average:
+        focal_est, cx_est, cy_est = (float(v) for v in np.median(arr, axis=0))
+        message = f"median over {len(per_pair)} feasible pairs"
+    else:
+        focal_est, cx_est, cy_est = (float(v) for v in arr[0])
+        message = "single-pair minimal solve"
+    return focal_est, cx_est, cy_est, True, message
 
 
 def run_single_trial(
@@ -350,51 +449,53 @@ def run_single_trial(
     scene_distance: float,
     scene_depth: float,
 ) -> TrialRecord:
-    K = np.array(
-        [
-            [focal_true, 0.0, cx_true],
-            [0.0, focal_true, cy_true],
-            [0.0, 0.0, 1.0],
-        ],
-        dtype=np.float64,
-    )
-    observations: list[FundamentalObservation] = []
-    for pair_index in range(condition.pair_count):
-        rotation, translation_direction, angle_deg = sample_motion(rng)
-        translation = baseline_length * translation_direction
-        F = estimate_pairwise_fundamental(
-            rng,
-            num_points=num_points,
-            image_size=image_size,
-            focal=focal_true,
-            cx=cx_true,
-            cy=cy_true,
-            rotation=rotation,
-            translation=translation,
-            image_noise_px=image_noise_px,
-            scene_distance=scene_distance,
-            scene_depth=scene_depth,
-        )
-        kwargs: dict[str, Any] = {
-            "F": F,
-            "weight": 1.0,
-            "label": f"pair_{pair_index}",
-        }
-        if condition.use_angle:
-            observed_angle_deg = float(angle_deg * (1.0 + angle_noise_sigma * rng.normal()))
-            kwargs["known_rotation_angle_deg"] = observed_angle_deg
-            kwargs["known_rotation_weight"] = 1.0
-        observations.append(FundamentalObservation(**kwargs))
-
-    estimate = run_profile_method(
-        observations,
+    pairs = _generate_pairs(
+        rng,
+        condition=condition,
         image_size=image_size,
-        focal_prior_px=focal_prior_px,
-        runtime=runtime,
+        focal_true=focal_true,
+        cx_true=cx_true,
+        cy_true=cy_true,
+        image_noise_px=image_noise_px,
+        angle_noise_sigma=angle_noise_sigma,
+        num_points=num_points,
+        baseline_length=baseline_length,
+        scene_distance=scene_distance,
+        scene_depth=scene_depth,
     )
-    focal_est = float(estimate.focal)
-    cx_est = float(estimate.cx)
-    cy_est = float(estimate.cy)
+
+    if condition.method == "profile":
+        observations: list[FundamentalObservation] = []
+        for pair_index, pair in enumerate(pairs):
+            kwargs: dict[str, Any] = {"F": pair.F, "weight": 1.0, "label": f"pair_{pair_index}"}
+            if condition.use_angle:
+                kwargs["known_rotation_angle_deg"] = pair.observed_angle_deg
+                kwargs["known_rotation_weight"] = 1.0
+            observations.append(FundamentalObservation(**kwargs))
+        estimate = run_profile_method(
+            observations,
+            image_size=image_size,
+            focal_prior_px=focal_prior_px,
+            runtime=runtime,
+        )
+        focal_est = float(estimate.focal)
+        cx_est = float(estimate.cx)
+        cy_est = float(estimate.cy)
+        success = bool(estimate.success)
+        loss = float(estimate.loss)
+        message = str(estimate.message)
+    elif condition.method in ("martyushev_single", "martyushev_avg"):
+        focal_est, cx_est, cy_est, success, message = _estimate_martyushev(
+            pairs,
+            image_size=image_size,
+            average=(condition.method == "martyushev_avg"),
+        )
+        loss = float("nan")
+    else:
+        raise ValueError(f"Unknown method: {condition.method}")
+
+    principal_error_px = float(math.hypot(cx_est - cx_true, cy_est - cy_true)) if math.isfinite(cx_est) else float("nan")
+    focal_error_percent = (focal_est - focal_true) / focal_true * 100.0 if math.isfinite(focal_est) else float("nan")
     return TrialRecord(
         method=condition.name,
         pair_count=condition.pair_count,
@@ -403,15 +504,15 @@ def run_single_trial(
         trial_index=int(trial_index),
         focal_true=float(focal_true),
         focal_est=focal_est,
-        focal_error_percent=(focal_est - focal_true) / focal_true * 100.0,
+        focal_error_percent=focal_error_percent,
         cx_true=float(cx_true),
         cy_true=float(cy_true),
         cx_est=cx_est,
         cy_est=cy_est,
-        principal_error_px=float(math.hypot(cx_est - cx_true, cy_est - cy_true)),
-        success=bool(estimate.success),
-        loss=float(estimate.loss),
-        message=str(estimate.message),
+        principal_error_px=principal_error_px,
+        success=bool(success),
+        loss=loss,
+        message=message,
     )
 
 
@@ -476,10 +577,12 @@ def run_synthetic_known_angle_benchmark(
     scene_depth = 0.5
     baseline_length = 0.1
     conditions = [
-        BenchmarkCondition(name="single_pair_f_only", pair_count=1, use_angle=False),
-        BenchmarkCondition(name="single_pair_angle", pair_count=1, use_angle=True),
-        BenchmarkCondition(name="multi_pair_f_only", pair_count=4, use_angle=False),
-        BenchmarkCondition(name="multi_pair_angle", pair_count=4, use_angle=True),
+        BenchmarkCondition(name="single_pair_f_only", pair_count=1, use_angle=False, method="profile"),
+        BenchmarkCondition(name="single_pair_angle", pair_count=1, use_angle=True, method="profile"),
+        BenchmarkCondition(name="multi_pair_f_only", pair_count=4, use_angle=False, method="profile"),
+        BenchmarkCondition(name="multi_pair_angle", pair_count=4, use_angle=True, method="profile"),
+        BenchmarkCondition(name="martyushev_single_pair", pair_count=1, use_angle=True, method="martyushev_single"),
+        BenchmarkCondition(name="martyushev_multi_pair_avg", pair_count=4, use_angle=True, method="martyushev_avg"),
     ]
     records: list[TrialRecord] = []
     for noise_sigma in noise_sigmas:
