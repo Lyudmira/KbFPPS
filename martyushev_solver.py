@@ -31,6 +31,7 @@ solutions generically, the feasible solution usually unique).
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import sympy as sp
@@ -173,16 +174,84 @@ def _omega_star() -> sp.Matrix:
     )
 
 
+def _derive_coefficient_model() -> tuple[list[list[tuple[int, int, int]]], Any]:
+    """One-time symbolic derivation of the four polynomials' coefficients.
+
+    The coefficients of f1..f4 (in the monomials of a, b, p) are closed-form
+    functions of the nine entries of F and tau. We derive them symbolically
+    ONCE at import and compile a numpy function, so per-instance solving is pure
+    float arithmetic instead of ~190 ms of sympy expansion (see
+    debug/profile_solver.py for the measurement that motivated this).
+
+    Returns (monomial_lists, evaluator) where monomial_lists[k] are the (a,b,p)
+    exponent tuples of equation k, and evaluator(F_flat9, tau) -> list of four
+    coefficient arrays aligned with monomial_lists.
+    """
+
+    F = sp.Matrix(3, 3, lambda i, j: sp.Symbol(f"F{i}{j}", real=True))
+    tau = sp.Symbol("tau", real=True)
+    omega = _omega_star()
+    fof = F * omega * F.T * omega
+    trace_term = fof.trace()
+    G = sp.Rational(1, 2) * trace_term * F - fof * F
+    wf = omega * F
+    angle = (
+        sp.Rational(1, 2) * (tau * tau - 1) * trace_term
+        + (tau + 1) * (wf * wf).trace()
+        - tau * (wf.trace()) ** 2
+    )
+    exprs = [sp.expand(G[0, 0]), sp.expand(G[1, 1]), sp.expand(G[2, 2]), sp.expand(angle)]
+
+    monomial_lists: list[list[tuple[int, int, int]]] = []
+    coeff_exprs: list[list[sp.Expr]] = []
+    for expr in exprs:
+        poly = sp.Poly(expr, _A, _B, _P)
+        monos = [(int(m[0]), int(m[1]), int(m[2])) for m in poly.monoms()]
+        monomial_lists.append(monos)
+        coeff_exprs.append(list(poly.coeffs()))
+
+    symbols = list(F) + [tau]
+    # Flatten all coefficient expressions into a single lambdified vector.
+    flat = [c for group in coeff_exprs for c in group]
+    flat_fn = sp.lambdify(symbols, flat, modules="numpy")
+    sizes = [len(group) for group in coeff_exprs]
+
+    def evaluator(F_flat9: np.ndarray, tau_value: float) -> list[np.ndarray]:
+        values = np.asarray(flat_fn(*F_flat9, tau_value), dtype=np.float64).reshape(-1)
+        out: list[np.ndarray] = []
+        offset = 0
+        for size in sizes:
+            out.append(values[offset : offset + size])
+            offset += size
+        return out
+
+    return monomial_lists, evaluator
+
+
+_MONOMIAL_LISTS, _COEFF_EVALUATOR = _derive_coefficient_model()
+
+
+def coefficient_dicts(F_normalized: np.ndarray, rotation_trace: float) -> list[dict[tuple[int, int, int], float]]:
+    """Fast path: numeric coefficient dicts for f1..f4 via the compiled model."""
+
+    F_flat = np.asarray(F_normalized, dtype=np.float64).reshape(9)
+    coeff_groups = _COEFF_EVALUATOR(F_flat, float(rotation_trace))
+    dicts: list[dict[tuple[int, int, int], float]] = []
+    for monos, coeffs in zip(_MONOMIAL_LISTS, coeff_groups):
+        dicts.append({mono: float(c) for mono, c in zip(monos, coeffs)})
+    return dicts
+
+
 def _build_polynomials(F_normalized: np.ndarray, rotation_trace: float) -> list[sp.Poly]:
+    """Symbolic reference build (slow). Retained for diagnostics; the solve path
+    uses coefficient_dicts() instead. See debug/profile_solver.py."""
+
     F = sp.Matrix([[sp.Float(float(v), 17) for v in row] for row in np.asarray(F_normalized, dtype=np.float64).reshape(3, 3)])
     omega = _omega_star()
     tau = sp.Float(float(rotation_trace), 17)
-
     fof = F * omega * F.T * omega
     trace_term = (fof).trace()
-    # Eq. constrFw1: G = 1/2 tr(F w F^T w) F - F w F^T w F = 0.
     G = sp.Rational(1, 2) * trace_term * F - fof * F
-    # Eq. constrFw2: known-rotation-angle constraint.
     wf = omega * F
     angle = (
         sp.Rational(1, 2) * (tau * tau - 1) * trace_term
@@ -206,6 +275,7 @@ def _poly_coeff_dicts(polys: list[sp.Poly]) -> list[dict[tuple[int, int, int], f
 
 
 # __NUMERIC_SOLVE__
+
 
 
 def _monomials_up_to(degree: int) -> list[tuple[int, int, int]]:
@@ -457,8 +527,7 @@ def solve_calibration_from_fundamental(
 ) -> list[MartyushevCalibrationSolution]:
     """Solve for (a, b, p) in the normalized frame, then denormalize K = S^-1 K_norm."""
 
-    polys = _build_polynomials(F_normalized, rotation_trace)
-    coeff_dicts = _poly_coeff_dicts(polys)
+    coeff_dicts = coefficient_dicts(F_normalized, rotation_trace)
     raw = _numeric_quotient_solve(coeff_dicts, degree=macaulay_degree)
     tau = float(rotation_trace)
     S_inv = np.eye(3, dtype=np.float64) if S is None else np.linalg.inv(np.asarray(S, dtype=np.float64).reshape(3, 3))
