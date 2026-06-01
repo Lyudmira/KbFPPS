@@ -1,0 +1,15 @@
+{
+  "experiment": "E6_speed",
+  "rows": [
+    {
+      "method": "martyushev",
+      "mean_solve_ms": 8.686640000018997,
+      "num_pairs": 1
+    },
+    {
+      "method": "martyushev_multi",
+      "mean_solve_ms": 34.71378499991715,
+      "num_pairs": 4
+    }
+  ]
+}

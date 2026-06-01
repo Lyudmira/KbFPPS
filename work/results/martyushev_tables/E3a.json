@@ -1,0 +1,142 @@
+{
+  "experiment": "E3a_image_noise",
+  "sigmas": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "rows": [
+    {
+      "method": "martyushev",
+      "num_pairs": 1,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 2.127538466074856e-14,
+      "median_focal_rel_error": 1.1766587704187258e-14,
+      "median_pp_error_px": 2.303627623854574e-11,
+      "mean_solve_ms": 8.442595000042274,
+      "mean_n_real": 1.25,
+      "mean_n_feasible": 1.25,
+      "image_noise_px": 0.0
+    },
+    {
+      "method": "martyushev_multi",
+      "num_pairs": 4,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 9.026236628275338e-15,
+      "median_focal_rel_error": 4.945377440890297e-15,
+      "median_pp_error_px": 8.740359809006709e-12,
+      "mean_solve_ms": 34.17686000000231,
+      "mean_n_real": 0.0,
+      "mean_n_feasible": 0.0,
+      "image_noise_px": 0.0
+    },
+    {
+      "method": "martyushev",
+      "num_pairs": 1,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 0.030638825420440042,
+      "median_focal_rel_error": 0.02226197001627827,
+      "median_pp_error_px": 28.136332391192504,
+      "mean_solve_ms": 8.863854999981413,
+      "mean_n_real": 1.25,
+      "mean_n_feasible": 1.25,
+      "image_noise_px": 0.25
+    },
+    {
+      "method": "martyushev_multi",
+      "num_pairs": 4,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 0.009454374969616342,
+      "median_focal_rel_error": 0.006399394079489071,
+      "median_pp_error_px": 11.209351006915679,
+      "mean_solve_ms": 42.97481999999491,
+      "mean_n_real": 0.0,
+      "mean_n_feasible": 0.0,
+      "image_noise_px": 0.25
+    },
+    {
+      "method": "martyushev",
+      "num_pairs": 1,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 0.06271752500114067,
+      "median_focal_rel_error": 0.04365060244952042,
+      "median_pp_error_px": 57.51256397531236,
+      "mean_solve_ms": 10.658604999957788,
+      "mean_n_real": 1.25,
+      "mean_n_feasible": 1.25,
+      "image_noise_px": 0.5
+    },
+    {
+      "method": "martyushev_multi",
+      "num_pairs": 4,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 0.017904688271074682,
+      "median_focal_rel_error": 0.012908128810924211,
+      "median_pp_error_px": 22.789650335666902,
+      "mean_solve_ms": 47.54742999996324,
+      "mean_n_real": 0.0,
+      "mean_n_feasible": 0.0,
+      "image_noise_px": 0.5
+    },
+    {
+      "method": "martyushev",
+      "num_pairs": 1,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 0.09691465209421429,
+      "median_focal_rel_error": 0.06186862074810734,
+      "median_pp_error_px": 88.57234166415914,
+      "mean_solve_ms": 8.795249999889165,
+      "mean_n_real": 1.25,
+      "mean_n_feasible": 1.25,
+      "image_noise_px": 0.75
+    },
+    {
+      "method": "martyushev_multi",
+      "num_pairs": 4,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 0.027172284460372086,
+      "median_focal_rel_error": 0.01799868176811697,
+      "median_pp_error_px": 34.0396947841692,
+      "mean_solve_ms": 33.36001499999384,
+      "mean_n_real": 0.0,
+      "mean_n_feasible": 0.0,
+      "image_noise_px": 0.75
+    },
+    {
+      "method": "martyushev",
+      "num_pairs": 1,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 0.13398939363024429,
+      "median_focal_rel_error": 0.0761900776755316,
+      "median_pp_error_px": 127.25330344592288,
+      "mean_solve_ms": 7.297140000036961,
+      "mean_n_real": 1.1,
+      "mean_n_feasible": 1.1,
+      "image_noise_px": 1.0
+    },
+    {
+      "method": "martyushev_multi",
+      "num_pairs": 4,
+      "trials": 20,
+      "feasible_rate": 1.0,
+      "median_K_rel_error": 0.038161423609846395,
+      "median_focal_rel_error": 0.0225409248159915,
+      "median_pp_error_px": 45.342809254197746,
+      "mean_solve_ms": 31.727490000048416,
+      "mean_n_real": 0.0,
+      "mean_n_feasible": 0.0,
+      "image_noise_px": 1.0
+    }
+  ]
+}

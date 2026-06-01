@@ -1,0 +1,6 @@
+{
+  "experiment": "E2_number_of_solutions",
+  "mean_n_real": 1.25,
+  "mean_n_feasible": 1.25,
+  "note": "paper: real solutions usually 2 or 4; feasible usually 1"
+}
